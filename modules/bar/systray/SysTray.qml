@@ -2,28 +2,50 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Effects
-import Quickshell
 import Quickshell.Services.SystemTray
+import qs.components
+import qs.config
+
 
 Item {
     id: root
     required property var bar;
-    implicitHeight: container.implicitHeight + 10
+    property int itemCount: SystemTray.items.values.length
+    Layout.fillHeight: true
+    Layout.preferredWidth: containerWidth
+    Layout.leftMargin: Appearance.padding.small
+    Layout.rightMargin: Appearance.padding.small
+    property int containerWidth: container.implicitWidth + Appearance.spacing.normal 
 
-    ColumnLayout {
-        id: container
+    Behavior on Layout.preferredWidth {
+        Anim {}
+    }
+
+    Component.onCompleted: {
+        console.log("SysTray initialized with", SystemTray.items.values.length, "items");
+    }
+
+    Rectangle {
+        id: background
         anchors {
-            fill: parent
-            margins: 5
+            fill: root
+        }
+        radius: 6
+        color: Colour.surfaceContainerHighest
+    }
+
+    RowLayout {
+        id: container
+        spacing: Appearance.spacing.small
+        anchors {
+            fill: background
+            leftMargin: Appearance.spacing.normal
+            rightMargin: Appearance.spacing.normal
         }
 
         Repeater {
             model: SystemTray.items
-            delegate: SysTrayIcon {
-                iconData: modelData
-                bar: root.bar
-            }
+            delegate: TrayItem {iconSize: Appearance.font.size.small * 2}
         }
     }
 

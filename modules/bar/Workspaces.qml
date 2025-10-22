@@ -3,19 +3,35 @@ pragma ComponentBehavior: Bound;
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Hyprland
-import qs.modules.common
-import qs
+import qs.components
+import qs.services
+import qs.config
 
-Rectangle {
+Item {
     id: root
-    Layout.alignment: Qt.AlignLeft
-    implicitWidth: row.implicitWidth + 8
-    height: bar.height - 8
-    color: Appearance.colors.colLayer4
-    radius: 5
-    required property var bar
+    Layout.fillHeight: true
+    Layout.preferredWidth: wsCount * 25 + 20
+
+
+    Rectangle {
+        id: background
+        anchors {
+            top: parent.top
+            bottom: parent.bottom
+            left: parent.left
+
+
+            leftMargin: 8
+        }
+        color: Colour.surfaceContainerHighest
+        width: row.implicitWidth + 10
+        radius: 8
+    }
+    
+    
+    required property var screen
     required property int wsBaseIndex
-    readonly property HyprlandMonitor monitor: Hyprland.monitorFor(bar.screen)
+    readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
     property int wsCount: 5
     property int currentIndex: 0
     property int existsCount: 0
@@ -25,66 +41,69 @@ Rectangle {
     RowLayout {
         id: row
         spacing: 8
-        anchors.fill: parent
-        anchors.margins: 3
+        
+        anchors {
+            fill: background
+            margins: 5
+        }
+
         Repeater {
             id: repeater
             model: root.wsCount
 
             Rectangle {
                 id: wsItem
-                width: parent.height / 2
-                height: parent.height /2
-                radius: active ? 10 : 2
-                color: active ? Appearance.colors.colPrimary : Appearance.m3colors[`term${index % 8}`] 
-
+                Layout.preferredWidth: area.containsMouse ? 20 : 15
+                height: 15
+                radius: active ? 10 : 4
+                color: currentColor
                 required property int index;
                 property int wsIndex: index + root.wsBaseIndex
-                property HyprlandWorkspace workspace: null
+                property HyprlandWorkspace workspace: Hypr.workspaces.values.find(ws => ws.id === wsIndex) ?? null
                 property bool exists: workspace != null
-                property bool active: workspace?.active ?? false
+                property bool active: workspace.active
+
+
+                property color currentColor: active ? 
+                    (area.containsMouse ? Colour.secondary : 
+                        Colour.primary) :
+                    (area.containsMouse ? Colour.textPrimaryContainer : 
+                        Colour.textSecondaryContainer)
+
+                Behavior on Layout.preferredWidth {
+                    Anim{}
+                }
+
+                Behavior on color {
+                    CAnim{}
+                }
+
+                Behavior on radius {
+                    Anim{}
+                }
+                
 
                 MouseArea {
+                    id: area
                     acceptedButtons: Qt.LeftButton
                     anchors.fill: parent
                     hoverEnabled: true
+                    cursorShape: containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
                     onPressed: {
-                        Hyprland.dispatch(`split-workspace ${wsItem.wsIndex}`);
+                        console.log("Switching to workspace", wsItem.wsIndex, wsItem.index);
+                        Hypr.dispatch(`split-workspace ${wsItem.index+1}`);
                     }
 
-                    onEntered: {
-                        if (wsItem.active) wsItem.color = Appearance.colors.colPrimaryHover;
-                        wsItem.width += 10
-                        wsItem.x -= 5
-                        Debug.debugText = `Workspace ${wsItem}`;
-                    }
-
-                    onExited: {
-                        if (wsItem.active) wsItem.color = Appearance.colors.colPrimary;
-                        wsItem.width -= 10
-                        wsItem.x += 5
-                    }
                 }
 
                 onActiveChanged: {
                     if (active) {
                         root.currentIndex = index;
-                        color = Appearance.colors.colPrimary;
-                        radius = 10
                     }
                 }
 
                 onExistsChanged: {
                     root.existsCount += exists ? 1 : -1;
-                }
-
-                Connections {
-                    target: root
-                    function onWorkspaceAdded(workspace: HyprlandWorkspace) {
-                        if (workspace.id == wsItem.wsIndex) {
-                            wsItem.workspace = workspace;
-                        }
-                    }
                 }
             }
 
@@ -98,12 +117,6 @@ Rectangle {
 		function onObjectInsertedPost(workspace) {
 			root.workspaceAdded(workspace);
 		}
-	}
-
-	Component.onCompleted: {
-		Hyprland.workspaces.values.forEach(workspace => {
-			root.workspaceAdded(workspace)
-		});
 	}
 
 }

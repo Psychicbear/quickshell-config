@@ -1,49 +1,51 @@
 import qs.services
-import qs.modules.common
-import qs.modules.common.widgets
+import qs.config
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
-import Quickshell.Wayland
 import Quickshell.Hyprland
 
 Item {
     id: root
-    readonly property HyprlandMonitor monitor: Hyprland.monitorFor(root.QsWindow.screen)
-    readonly property Toplevel activeWindow: ToplevelManager.activeToplevel
-    function onMonitorChanged() {
-        console.log("ActiveWindow monitor changed to", monitor)
-    }
+    required property var bar
+    readonly property HyprlandMonitor monitor: Hypr.monitorFor(root.bar.screen)
+    property bool focusingThisMonitor: Hypr.focusedMonitor.name == monitor?.name
+    readonly property HyprlandToplevel activeWindow: Hypr.activeToplevel
+    property HyprlandToplevel activeMonitorWindow: focusingThisMonitor ? activeWindow : activeMonitorWindow
 
-    property string activeWindowAddress: `0x${activeWindow?.HyprlandToplevel?.address}`
-    property bool focusingThisMonitor: HyprData.activeWorkspace?.monitor == monitor?.name
-    property var biggestWindow: HyprData.biggestWindowForWorkspace(HyprData.monitors[root.monitor?.id]?.activeWorkspace.id)
+    
 
-    implicitWidth: colLayout.implicitWidth
+
+    Layout.fillHeight: true
+    Layout.preferredWidth: colLayout.implicitWidth + 20
 
     ColumnLayout {
         id: colLayout
 
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.left: parent.left
-        anchors.right: parent.right
+        Layout.fillWidth: true
         spacing: -4
 
         Text {
             Layout.fillWidth: true
-            font.pixelSize: Appearance.font.pixelSize.smaller
-            color: Appearance.colors.colSubtext
+            font {
+                family: Appearance.font.family.title
+                pixelSize: Appearance.font.size.smaller
+            }
+            color: Colour.textSurfaceVariant
             elide: Text.ElideRight
-            text: root.activeWindow?.appId || root.biggestWindow?.appId || "No windows"
+            text: root.activeMonitorWindow?.wayland?.appId || "Hyprland"
 
         }
 
         Text {
             Layout.fillWidth: true
-            font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer0
+            font {
+                family: Appearance.font.family.title
+                pixelSize: Appearance.font.size.large
+            }
+
+            color: Colour.textSurface
             elide: Text.ElideRight
-            text: root.activeWindow?.title
+            text: root.activeMonitorWindow?.title || "Desktop"
         }
 
     }

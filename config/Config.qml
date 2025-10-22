@@ -25,6 +25,7 @@ Singleton {
     property alias sidebar: adapter.sidebar
     property alias services: adapter.services
     property alias paths: adapter.paths
+    property AnimationConf.Anim anim: AnimationConf.Anim {}
 
     ElapsedTimer {
         id: timer

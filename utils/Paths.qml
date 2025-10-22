@@ -11,10 +11,10 @@ Singleton {
     readonly property string pictures: Quickshell.env("XDG_PICTURES_DIR") || `${home}/Pictures`
     readonly property string videos: Quickshell.env("XDG_VIDEOS_DIR") || `${home}/Videos`
 
-    readonly property string data: `${Quickshell.env("XDG_DATA_HOME") || `${home}/.local/share`}/caelestia`
-    readonly property string state: `${Quickshell.env("XDG_STATE_HOME") || `${home}/.local/state`}/caelestia`
-    readonly property string cache: `${Quickshell.env("XDG_CACHE_HOME") || `${home}/.cache`}/caelestia`
-    readonly property string config: `${Quickshell.env("XDG_CONFIG_HOME") || `${home}/.config`}/caelestia`
+    readonly property string data: `${Quickshell.env("XDG_DATA_HOME") || `${home}/.local/share`}/quaccshell`
+    readonly property string state: `${Quickshell.env("XDG_STATE_HOME") || `${home}/.local/state`}/quaccshell`
+    readonly property string cache: `${Quickshell.env("XDG_CACHE_HOME") || `${home}/.cache`}/quaccshell`
+    readonly property string config: `${Quickshell.env("XDG_CONFIG_HOME") || `${home}/.config`}/quaccshell`
 
     readonly property string imagecache: `${cache}/imagecache`
     readonly property string notifimagecache: `${imagecache}/notifs`
