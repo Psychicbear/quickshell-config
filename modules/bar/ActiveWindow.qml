@@ -10,8 +10,22 @@ Item {
     readonly property HyprlandMonitor monitor: Hypr.monitorFor(root.bar.screen)
     property bool focusingThisMonitor: Hypr.focusedMonitor.name == monitor?.name
     readonly property HyprlandToplevel activeWindow: Hypr.activeToplevel
-    property HyprlandToplevel activeMonitorWindow: focusingThisMonitor ? activeWindow : activeMonitorWindow
+    property HyprlandToplevel activeMonitorWindow
 
+    Connections {
+        target: root
+        onActiveWindowChanged: {
+            if (root.focusingThisMonitor) {
+                root.activeMonitorWindow = root.activeWindow;
+            }
+        }
+    }
+
+    onFocusingThisMonitorChanged: {
+        if (focusingThisMonitor) {
+            root.activeMonitorWindow = root.activeWindow;
+        }
+    }
     
 
 

@@ -11,7 +11,7 @@ Item {
     id: root
     required property var bar;
     property int itemCount: SystemTray.items.values.length
-    Layout.fillHeight: true
+    Layout.fillHeight: containerWidth
     Layout.preferredWidth: containerWidth
     Layout.leftMargin: Appearance.padding.small
     Layout.rightMargin: Appearance.padding.small
@@ -30,6 +30,8 @@ Item {
         anchors {
             fill: root
         }
+        implicitHeight: root.Layout.preferredHeight
+        implicitWidth: root.Layout.preferredWidth
         radius: 6
         color: Colour.surfaceContainerHighest
     }
@@ -37,6 +39,7 @@ Item {
     RowLayout {
         id: container
         spacing: Appearance.spacing.small
+        implicitWidth: repeater.implicitWidth + Appearance.spacing.normal * 2
         anchors {
             fill: background
             leftMargin: Appearance.spacing.normal
@@ -44,6 +47,7 @@ Item {
         }
 
         Repeater {
+            id: repeater
             model: SystemTray.items
             delegate: TrayItem {iconSize: Appearance.font.size.small * 2}
         }

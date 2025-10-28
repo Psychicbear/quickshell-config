@@ -6,12 +6,16 @@ import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
 import qs.components
+import qs.components.effects
 
 MouseArea {
     id: root
 
     required property SystemTrayItem modelData
     property alias iconSize: icon.implicitSize
+    
+    signal menuOpened(qsWindow: var)
+    signal menuClosed()
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     cursorShape: Qt.PointingHandCursor
@@ -19,26 +23,40 @@ MouseArea {
     Layout.preferredWidth: Appearance.font.size.small * 2
     Layout.preferredHeight: Appearance.font.size.small * 2
 
-    onClicked: event => {
-        if (event.button === Qt.LeftButton)
+    onPressed: (event) => {
+        switch (event.button) {
+        case Qt.LeftButton:
             modelData.activate();
-        else
-            modelData.secondaryActivate();
+            break;
+        case Qt.RightButton:
+            if (modelData.hasMenu) menu.open();
+            break;
+        }
+        event.accepted = true;
     }
 
-    Rectangle {
-        id: background
-        anchors {
-            fill: parent
-        }
-        property int size: icon.implicitSize * 2 + 4
-        width: size
-        height: size
-        color: root.containsMouse ? Colour.textPrimaryContainer : "transparent"
-        radius: 5
 
-        Behavior on color {
-            CAnim{}
+     Loader {
+        id: menu
+        function open() {
+            menu.active = true;
+        }
+        active: false
+        sourceComponent: TrayMenu {
+            Component.onCompleted: this.open();
+            trayItem: root.modelData.menu
+            anchors {
+                // window: root.QsWindow.window
+                left: root.x + QsWindow.window?.width
+                top: root.y 
+                bottom: root.height
+                right: root.width
+            }
+            onMenuOpened: (window) => root.menuOpened(window);
+            onMenuClosed: {
+                root.menuClosed();
+                menu.active = false;
+            }
         }
     }
 

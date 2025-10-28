@@ -11,11 +11,25 @@ import QtQuick.Controls
 StackView {
     id: root
 
-    required property Item popouts
     required property QsMenuHandle trayItem
 
     implicitWidth: currentItem.implicitWidth
     implicitHeight: currentItem.implicitHeight
+
+    signal menuClosed
+    signal menuOpened(qsWindow: var)
+
+    function open() {
+        root.visible = true;
+        root.menuOpened(root);
+    }
+
+    function close() {
+        root.visible = false;
+        while (root.depth > 1)
+            root.pop();
+        root.menuClosed();
+    }
 
     initialItem: SubMenu {
         handle: root.trayItem
@@ -76,7 +90,7 @@ StackView {
                 implicitHeight: modelData.isSeparator ? 1 : children.implicitHeight
 
                 radius: Appearance.rounding.full
-                color: modelData.isSeparator ? Colours.outlineVariant : "transparent"
+                color: modelData.isSeparator ? Colour.outlineVariant : "transparent"
 
                 Loader {
                     id: children
@@ -107,7 +121,6 @@ StackView {
                                     }));
                                 else {
                                     item.modelData.triggered();
-                                    root.popouts.hasCurrent = false;
                                 }
                             }
                         }
@@ -134,7 +147,7 @@ StackView {
                             anchors.leftMargin: icon.active ? Appearance.spacing.smaller : 0
 
                             text: labelMetrics.elidedText
-                            color: item.modelData.enabled ? Colours.textSurface : Colours.outline
+                            color: item.modelData.enabled ? Colour.textSurface : Colour.outline
                         }
 
                         TextMetrics {
@@ -159,7 +172,7 @@ StackView {
 
                             sourceComponent: MaterialIcon {
                                 text: "chevron_right"
-                                color: item.modelData.enabled ? Colours.textSurface : Colours.outline
+                                color: item.modelData.enabled ? Colour.textSurface : Colour.outline
                             }
                         }
                     }
@@ -187,11 +200,11 @@ StackView {
                         anchors.rightMargin: -Appearance.padding.smaller * 2
 
                         radius: Appearance.rounding.full
-                        color: Colours.secondaryContainer
+                        color: Colour.secondaryContainer
 
                         StateLayer {
                             radius: parent.radius
-                            color: Colours.textSecondaryContainer
+                            color: Colour.textSecondaryContainer
 
                             function onClicked(): void {
                                 root.pop();
@@ -207,13 +220,13 @@ StackView {
                         MaterialIcon {
                             anchors.verticalCenter: parent.verticalCenter
                             text: "chevron_left"
-                            color: Colours.textSecondaryContainer
+                            color: Colour.textSecondaryContainer
                         }
 
                         StyledText {
                             anchors.verticalCenter: parent.verticalCenter
                             text: qsTr("Back")
-                            color: Colours.textSecondaryContainer
+                            color: Colour.textSecondaryContainer
                         }
                     }
                 }

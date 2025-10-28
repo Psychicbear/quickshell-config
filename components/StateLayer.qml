@@ -6,7 +6,7 @@ MouseArea {
     id: root
 
     property bool disabled
-    property color color: Colours.palette.m3onSurface
+    property color color: Colour.textSurface
     property real radius: parent?.radius ?? 0
     property alias rect: hoverLayer
 
